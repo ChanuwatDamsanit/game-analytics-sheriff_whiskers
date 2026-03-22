@@ -13,9 +13,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject gameOverScene;
     [SerializeField] GameObject gameWinScene;
 
+    [SerializeField] Projectile2D projectile2D;
+
 
     private void Awake()
     {
+        // This finds the scripts automatically if they are in your scene!
+        if (playerMovement == null) playerMovement = FindFirstObjectByType<PlayerMovement>();
+        if (projectile2D == null) projectile2D = FindFirstObjectByType<Projectile2D>();
+
         gameOverScene.SetActive(false);
         gameWinScene.SetActive(false);
     }
@@ -41,6 +47,16 @@ public class GameManager : MonoBehaviour
     public void GameWin()
     {
         gameWinScene.SetActive(true);
+
+        // Get the data from your other scripts
+        int totalShots = projectile2D.GetShotCount();
+        int totalCoins = playerMovement.coinCount;
+
+        // Call the updated function with only 2 parameters
+        if (AnalyticManager.instance != null)
+        {
+            AnalyticManager.instance.SendLevelCompleteEvent(totalShots, totalCoins);
+        }
     }
 
     public void Restart()

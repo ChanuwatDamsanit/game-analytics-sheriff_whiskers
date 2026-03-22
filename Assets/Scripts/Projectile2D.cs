@@ -3,39 +3,40 @@ using UnityEngine;
 public class Projectile2D : MonoBehaviour
 {
     [SerializeField] Transform shootpoint;
-    [SerializeField] GameObject target; //target sprite
+    [SerializeField] GameObject target;
     [SerializeField] Rigidbody2D bulletPrefab;
+
+    private int shotCount = 0; // The counter
 
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            //shoot raycast to detect mouse click position
-            Ray ray =  Camera.main.ScreenPointToRay(Input.mousePosition);
-            Debug.DrawRay(ray.origin, ray.direction * 5f, Color.red, 5f);
-
-            //get click point
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
 
-            //if hit object with collider
             if (hit.collider != null)
             {
-                target.transform.position = new Vector2(hit.point.x, hit.point.y);
-                Debug.Log("hit " + hit.collider.name);
+                shotCount++; // Increment counter each time you shoot
 
-                //calculate projectile velocity
+                target.transform.position = new Vector2(hit.point.x, hit.point.y);
                 Vector2 projectileVelocity = CalcualteprojectileVelocity(shootpoint.position, hit.point, 1f);
 
-                //shoot bullet prefab using regidbody2d
                 Rigidbody2D shootbullet = Instantiate(bulletPrefab, shootpoint.position, Quaternion.identity);
-
-                //add projectile velocity vector to the bullet rigidbody
                 shootbullet.linearVelocity = projectileVelocity;
             }
         }
+    }
 
-        Vector2 CalcualteprojectileVelocity(Vector2 origin, Vector2 target, float time)
-        {
+    // Call this when the level ends to pass the total count to Analytics
+   /* public void FinalizeShots(string levelName)
+    {
+        AnalyticManager.instance.SendLevelCompleteEvent(levelName, shotCount);
+        shotCount = 0; // Reset for next level
+    }*/
+
+    Vector2 CalcualteprojectileVelocity(Vector2 origin, Vector2 target, float time)
+    {
             Vector2 distance = target - origin;
 
             //find velocity of x and y axis
@@ -47,6 +48,11 @@ public class Projectile2D : MonoBehaviour
 
             return projectileVelocity;
 
-        }
+    }
+
+    public int GetShotCount()
+    {
+        return shotCount;
     }
 }
+
