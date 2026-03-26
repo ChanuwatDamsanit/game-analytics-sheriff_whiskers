@@ -3,56 +3,67 @@ using UnityEngine;
 public class Projectile2D : MonoBehaviour
 {
     [SerializeField] Transform shootpoint;
-    [SerializeField] GameObject target;
+    [SerializeField] GameObject target; // This is your crosshair
     [SerializeField] Rigidbody2D bulletPrefab;
 
-    private int shotCount = 0; // The counter
+    [Header("Orbit Settings")]
+    [SerializeField] float orbitRadius = 1.5f;
+
+    private int shotCount = 0;
 
     void Update()
     {
+        UpdateCrosshair(); // Always follow the mouse
+        RotateShootPoint();
+
         if (Input.GetMouseButtonDown(0))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity);
-
-            if (hit.collider != null)
-            {
-                shotCount++; // Increment counter each time you shoot
-
-                target.transform.position = new Vector2(hit.point.x, hit.point.y);
-                Vector2 projectileVelocity = CalcualteprojectileVelocity(shootpoint.position, hit.point, 1f);
-
-                Rigidbody2D shootbullet = Instantiate(bulletPrefab, shootpoint.position, Quaternion.identity);
-                shootbullet.linearVelocity = projectileVelocity;
-            }
+            HandleShooting();
         }
     }
 
-    // Call this when the level ends to pass the total count to Analytics
-   /* public void FinalizeShots(string levelName)
+    void UpdateCrosshair()
     {
-        AnalyticManager.instance.SendLevelCompleteEvent(levelName, shotCount);
-        shotCount = 0; // Reset for next level
-    }*/
+        // Get mouse position in world space
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0; // Ensure it stays on the 2D plane
+
+        // Move the target (crosshair) to the mouse position
+        target.transform.position = mousePos;
+    }
+
+    void RotateShootPoint()
+    {
+        // Use the crosshair's position as the target for rotation
+        Vector2 direction = (target.transform.position - transform.position).normalized;
+
+        shootpoint.position = (Vector2)transform.position + (direction * orbitRadius);
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        shootpoint.rotation = Quaternion.Euler(0, 0, angle);
+    }
+
+    void HandleShooting()
+    {
+        // Since the crosshair is already at the mouse position, we use target.transform.position
+        Vector2 hitPoint = target.transform.position;
+
+        shotCount++;
+
+        Vector2 projectileVelocity = CalcualteprojectileVelocity(shootpoint.position, hitPoint, 1f);
+
+        Rigidbody2D shootbullet = Instantiate(bulletPrefab, shootpoint.position, shootpoint.rotation);
+        shootbullet.linearVelocity = projectileVelocity;
+    }
 
     Vector2 CalcualteprojectileVelocity(Vector2 origin, Vector2 target, float time)
     {
-            Vector2 distance = target - origin;
+        Vector2 distance = target - origin;
+        float velocityX = distance.x / time;
+        float velocityY = distance.y / time + 0.5f * Mathf.Abs(Physics2D.gravity.y) * time;
 
-            //find velocity of x and y axis
-            float velocityX =  distance.x / time;
-            float velocityY = distance.y / time + 0.5f * Mathf.Abs(Physics2D.gravity.y) * time;
-
-            //get projectile vector
-            Vector2 projectileVelocity = new Vector2(velocityX, velocityY);
-
-            return projectileVelocity;
-
+        return new Vector2(velocityX, velocityY);
     }
 
-    public int GetShotCount()
-    {
-        return shotCount;
-    }
+    public int GetShotCount() => shotCount;
 }
-
