@@ -46,11 +46,7 @@ public class PlayerMovement : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D other)
     {
 
-        if (other.gameObject.CompareTag("Coin"))
-        {
-            coinCount++;
-            Destroy(other.gameObject);
-        }
+        
         if (other.gameObject.CompareTag("Enemy"))
         {
             playerHp -= 1;
@@ -71,6 +67,13 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log("Win");
             gameManager.GameWin();
+        }
+
+        else if (other.gameObject.CompareTag("Coin"))
+        {
+            Debug.Log("Coin Collected");
+            coinCount++;
+            Destroy(other.gameObject);
         }
     }
 }
