@@ -28,7 +28,12 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        
+        // RESET the timer every time the scene starts/restarts
+        if (AnalyticManager.instance != null)
+        {
+            AnalyticManager.instance.StartLevelTimer();
+            Debug.Log("Level timer reset!");
+        }
     }
 
     void Update()
