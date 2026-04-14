@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        currentCoin.text = "Coin Collected: " + playerMovement.coinCount.ToString() + "/20";
+        currentCoin.text = "Coin Collected: " + playerMovement.coinCount.ToString() + "/17";
         winTotalCoins.text = "Coin Collected: " + playerMovement.coinCount.ToString();
         loseTotalCoins.text = "Coin Collected: " + playerMovement.coinCount.ToString();
         currentHp.text = "HP: " + playerMovement.playerHp.ToString();
@@ -61,6 +61,9 @@ public class GameManager : MonoBehaviour
         if (AnalyticManager.instance != null)
         {
             AnalyticManager.instance.SendLevelCompleteEvent(totalShots, totalCoins);
+
+            Unity.Services.Analytics.AnalyticsService.Instance.Flush();
+            Debug.Log("Forced Analytics Upload!");
         }
     }
 
